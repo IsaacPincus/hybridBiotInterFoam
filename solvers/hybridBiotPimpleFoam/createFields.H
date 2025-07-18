@@ -26,6 +26,13 @@ dimensionedScalar rhof
     transportProperties.lookup("rhof")
 );
 
+// Info<< "Reading density of fluid 'rho', same as rhof\n" << endl;
+// dimensionedScalar rho
+// (
+//     "rho",
+//     transportProperties.lookup("rhof")
+// );
+
 Info<< "Reading density of solid 'rhos'\n" << endl;
 dimensionedScalar rhos
 (
@@ -112,7 +119,23 @@ volScalarField epsf
     (1-epss)
 );
 
-Info<< "Readin solid equilibrium indicator variable Solid\n" << endl;
+// I shouldn't need this with pressure specified in the correct units
+// Info<< "Creating fluid density field 'rho'\n" << endl;
+// volScalarField rho
+// (
+//     IOobject
+//     (
+//         "rho",
+//         runTime.timeName(),
+//         mesh,
+//         IOobject::NO_READ,
+//         IOobject::NO_WRITE
+//     ),
+//     mesh,
+//     rhof
+// );
+
+Info<< "Reading solid equilibrium indicator variable Solid\n" << endl;
 volScalarField Solid
 (
     IOobject

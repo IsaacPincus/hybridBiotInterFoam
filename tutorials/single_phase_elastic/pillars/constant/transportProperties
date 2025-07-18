@@ -1,0 +1,44 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.1                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      transportProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Fluid phase parameters
+transportModel  Newtonian; 
+nuf              [0 2 -1 0 0 0 0] 1e-6;     // fluid viscocity
+rhof             [1 -3 0 0 0 0 0] 1000;     // fluid density
+//nu               [0 2 -1 0 0 0 0] 1e-6;     // fluid viscocity
+//rho              [1 -3 0 0 0 0 0] 1000;     // fluid density
+
+k0inv            [0 -2 0 0 0 0 0] 1e-9;     // 1/k0 in Kozeny-Karman formula
+Fkinv            [0 -2 0 0 0 0 0] 0.0;      // Drag term for Hele-Shaw flow, Fkinv*grad(u)
+
+// Solid Phase Parameters
+activateSolidMechanics 1;                       //do we want to include solid mechanics?  
+sigma            [0 0 0 0 0 0 0]  0.0;                           // Terzaghi Coeff. 'sigma', unclear what this actually does!
+rhos             [1 -3 0 0 0 0 0] 2350;         // solid density
+
+// Scalar transport parameters
+SolveConvectionEqn 0;                          // do we want to solve scalar transport for concentration C?
+Df              [0 2 -1 0 0 0 0] 1e-9;         // Diffusivity of scalar field
+n               [0 0 0 0 0 0 0]  1.0;          // Diffusivity tourtuosity coefficient, Dion=Df*pow((1-epss),(n-1));
+
+// Reaction fields if needed, applies to solid!! Not scalar transport.
+epssEq         [0 0 0 0 0 0 0] 0.5;                     // equilibrium porosity
+krxn           [0 0 -1 0 0 0 0] 0.0;                     // Reaction rate constant for solid units of 1/(seconds * control Vol)
+
+//choose if we want to include ddt(porosity) effects on pressure.
+//pCoeff 0;
+// ************************************************************************* //

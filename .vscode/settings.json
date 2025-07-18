@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "elasticHBPF.C": "cpp",
+        "plasticHBPF.C": "cpp",
+        "plasticHBIF.C": "cpp",
+        "elasticHBIF.C": "cpp",
+        "hydrostaticDisplacementFvPatchVectorField.C": "cpp",
+        "tractionDisplacementFvPatchVectorField.C": "cpp",
+        "convectionTest.C": "cpp",
+        "convectionFoam.C": "cpp",
+        "capillarityModel.C": "cpp",
+        "krBrooksAndCorey.C": "cpp"
+    }
+}

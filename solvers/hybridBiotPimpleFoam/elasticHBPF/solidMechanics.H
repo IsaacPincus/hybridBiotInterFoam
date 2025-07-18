@@ -21,6 +21,12 @@ Terzaghi = -(epss*rhof/rhos)*fvc::grad(p);
                     fvm::ddt(T) == fvm::laplacian(DT, T)
                 );
             }
+            
+            // check some bounds, make sure there's no funny business
+            // Info << "Min/Max epss: " << min(epss) << " / " << max(epss) << endl;
+            // Info << "Min/Max kinv: " << min(kinv) << " / " << max(kinv) << endl;
+            // Info << "Min/Max divSigmaExp : " << min(divSigmaExp ) << " / " << max(divSigmaExp ) << endl;
+            // Info << "Min/Max D : " << min(D) << " / " << max(D) << endl;
 
             { //This is always done
                 fvVectorMatrix DEqn 
@@ -56,6 +62,9 @@ Terzaghi = -(epss*rhof/rhos)*fvc::grad(p);
                     divSigmaExp = fvc::div(DEqn.flux()); 
                 }
             }
+
+            // check some bounds, make sure there's no funny business
+            // Info << "do we get here?" << endl;
 
             {//Calculating Explicit Stress Tensor
 

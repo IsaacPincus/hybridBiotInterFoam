@@ -8,7 +8,7 @@ tmp<fvVectorMatrix> tUEqn
 	//Viscous Terms
       - (1/epsf)*(fvm::laplacian(nuf,U))
       - (1/epsf)*(fvc::div(nuf*dev2(T(fvc::grad(U)))))
-	
+
 	//Implicit Drag Term
       + fvm::Sp((nuf*kinv),U) 
 

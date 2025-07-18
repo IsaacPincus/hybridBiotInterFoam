@@ -1,0 +1,30 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  7                                     |
+|   \\  /    A nd           | Website:  www.openfoam.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      extrudeMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+constructFrom patch;
+sourceCase ".";
+sourcePatches (back);        // Use back patch, for some reason front patch gives a poor mesh!
+exposedPatchName back;        // This will be the new front patch
+nLayers 1;
+expansionRatio 1.0;
+extrudeModel linearDirection;
+linearDirectionCoeffs
+{
+    direction (0 0 1);
+    thickness 1e-5;           // Small thickness for 2D
+}
+mergeFaces false;
+flipNormals false;

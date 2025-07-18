@@ -19,80 +19,88 @@ volVectorField CapTerm ((Solid/rho_s)*
 
 //Calculating Displacement
 
-        do
+do
+{
+    if (thermalStress)
+    {
+        volScalarField& T = Tptr();
+        solve
+        (
+            fvm::ddt(T) == fvm::laplacian(DT, T)
+        );
+    }
+
+    //Info<< "\nIn Solid Displacement Loop" << endl;
+
+    { //This is always done
+        fvVectorMatrix DEqn 
+        (
+    //transient term, D is displacement vector
+            fvm::d2dt2(epss,D) 
+            ==
+    //implicit part of the stress tensor
+            epss*fvm::laplacian((2*mu + lambda), D, "laplacian(DD,D)")
+
+    //Terzaghi Term
+    + Terzaghi
+
+    //Gravity Term
+    + epss*g
+
+            //Transport Momentum Source 
+            + fvc::Sp(eps*Drag/rho_s, U)
+            - fvc::Sp(epss*eps*Drag/rho_s, Us)
+
+            //Capillary Pressure Source
+            - CapTerm                   
+
+            //Explicit Part of Stress Tensor
+            + epss*divSigmaExp 
+        );
+
+
+        if (thermalStress)
         {
-            if (thermalStress)
-            {
-                volScalarField& T = Tptr();
-                solve
-                (
-                    fvm::ddt(T) == fvm::laplacian(DT, T)
-                );
-            }
+            const volScalarField& T = Tptr();
+            DEqn += fvc::grad(threeKalpha*T);
+        }
 
-            { //This is always done
-                fvVectorMatrix DEqn 
-                (
-		    //transient term, D is displacement vector
-                    fvm::d2dt2(epss,D) 
-                 ==
-		    //implicit part of the stress tensor
-                    epss*fvm::laplacian((2*mu + lambda), D, "laplacian(DD,D)")
+        initialResidual = DEqn.solve().max().initialResidual();
 
-		    //Terzaghi Term
-		    + Terzaghi
+        if (!compactNormalStress)
+        {
+            divSigmaExp = fvc::div(DEqn.flux()); 
+        }
+    }
 
-		    //Gravity Term
-		    + epss*g
+    //Info<< "\nFinished Calculating Always on Terms" << endl;
 
-                    //Transport Momentum Source 
-                    + fvc::Sp(eps*Drag/rho_s, U)
-                    - fvc::Sp(epss*eps*Drag/rho_s, Us)
+    {//Calculating Explicit Stress Tensor
 
-                    //Capillary Pressure Source
-                    - CapTerm                   
+        volTensorField gradD(fvc::grad(D));
+        sigmaD = (mu*twoSymm(gradD) + (lambda*I)*tr(gradD));
 
-                    //Explicit Part of Stress Tensor
-                    + epss*divSigmaExp 
-                );
+        if (compactNormalStress) 
+        {
+            divSigmaExp = fvc::div
+            (
+                sigmaD - ((2*mu + lambda)*gradD),
+                "div(sigmaD)"
+            );
+        }
+        else 
+        {
+            divSigmaExp += fvc::div(sigmaD);
+        }
+    }
 
+    //Info<< "\nFinished Calculating Explicit Stress Tensor" << endl;
 
-                if (thermalStress)
-                {
-                    const volScalarField& T = Tptr();
-                    DEqn += fvc::grad(threeKalpha*T);
-                }
+} while (initialResidual > convergenceTolerance && ++iCorr < nCorr);
 
-                initialResidual = DEqn.solve().max().initialResidual();
+//Info<< "\nFinished Calculating Solid Displacement Field" << endl;
 
-                if (!compactNormalStress)
-                {
-                    divSigmaExp = fvc::div(DEqn.flux()); 
-                }
-            }
-
-            {//Calculating Explicit Stress Tensor
-
-                volTensorField gradD(fvc::grad(D));
-                sigmaD = (mu*twoSymm(gradD) + (lambda*I)*tr(gradD));
-
-                if (compactNormalStress) 
-                {
-                    divSigmaExp = fvc::div
-                    (
-                        sigmaD - ((2*mu + lambda)*gradD),
-                        "div(sigmaD)"
-                    );
-                }
-                else 
-                {
-                    divSigmaExp += fvc::div(sigmaD);
-                }
-            }
-
-        } while (initialResidual > convergenceTolerance && ++iCorr < nCorr);
-
-	//here we reconstruct the final stress tensor from everything to print
-        #include "calculateStress.H"
+//here we reconstruct the final stress tensor from everything to print
+#include "calculateStress.H"
 
 // ************************************************************************* //

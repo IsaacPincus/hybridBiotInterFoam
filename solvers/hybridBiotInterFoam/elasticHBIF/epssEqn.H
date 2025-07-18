@@ -16,5 +16,9 @@ fvScalarMatrix epssEqn
 epssEqn.solve();
 epss.correctBoundaryConditions();
 
+// I don't know why this is here... Doesn't let you set solid and fluid domains!
 epss.min(0.99);
 epss.max(0.01);
+
+// epss.min(0.999);
+// epss.max(0.0);

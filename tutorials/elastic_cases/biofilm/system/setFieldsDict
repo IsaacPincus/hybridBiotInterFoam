@@ -1,0 +1,63 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      setFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+defaultFieldValues
+(
+    volScalarFieldValue epss    1e-2
+    volScalarFieldValue K       5e-9
+);
+
+xc1 -8e-5;
+yc1 5e-5;
+xc2 1.5e-4;
+yc2 3.4e-5;
+R 3e-5;
+Ksolid 5e-8;
+
+regions
+(
+
+    // Cylinder region
+    cylinderToCell
+    {
+        p1 ($xc1 $yc1 -1);        // Bottom center of cylinder
+        p2 ($xc1 $yc1  1);        // Top center of cylinder  
+        radius $R;         // Cylinder radius
+        
+        fieldValues
+        (
+            volScalarFieldValue epss    5e-1      // Inside cylinder: biofilm (solid)
+            volScalarFieldValue K       $Ksolid      // Inside cylinder: biofilm (solid)
+        );
+    }
+
+    // // Cylinder region
+    // cylinderToCell
+    // {
+    //    p1 ($xc2 $yc2 -1);        // Bottom center of cylinder
+    //    p2 ($xc2 $yc2  1);        // Top center of cylinder  
+    //    radius $R;         // Cylinder radius
+       
+    //    fieldValues
+    //    (
+    //        volScalarFieldValue epss 1e-5      // Inside cylinder: biofilm (solid)
+    //    );
+    // }
+);
+
+
+// ************************************************************************* //

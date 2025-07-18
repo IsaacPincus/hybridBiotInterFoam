@@ -1,0 +1,92 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2212                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      createPatchDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+pointSync false;
+
+patches
+(
+    // Example of "renaming" a patch
+    // i.e moving faces from an exising patch to a new one
+    // repeat this section if you want to "rename" more patches
+    {
+
+        // name of our new patch
+        name    frontAndBack;
+
+        // build our new patch from an existing one
+        constructFrom patches;
+
+        // name of our old patch
+        patches (front);
+
+        // set basic patch info
+        patchInfo
+        {
+            // patch type for our new patch
+            type empty;
+
+            // what groups should our new patch be in (optional)
+            //inGroups (Group01 Group02);
+        }
+    }
+
+    {
+
+        // name of our new patch
+        name    frontAndBack;
+
+        // build our new patch from an existing one
+        constructFrom patches;
+
+        // name of our old patch
+        patches (back);
+
+        // set basic patch info
+        patchInfo
+        {
+            // patch type for our new patch
+            type empty;
+
+            // what groups should our new patch be in (optional)
+            //inGroups (Group01 Group02);
+        }
+    }
+
+    {
+
+        // name of our new patch
+        name    walls;
+
+        // build our new patch from an existing one
+        constructFrom patches;
+
+        // name of our old patch
+        patches (geometry);
+
+        // set basic patch info
+        patchInfo
+        {
+            // patch type for our new patch
+            type wall;
+
+            // what groups should our new patch be in (optional)
+            //inGroups (Group01 Group02);
+        }
+    }
+
+);
+
+// ************************************************************************* //

@@ -1,1 +1,0 @@
-../relativePermeabilityModels/BrooksAndCorey/krBrooksAndCorey.H
