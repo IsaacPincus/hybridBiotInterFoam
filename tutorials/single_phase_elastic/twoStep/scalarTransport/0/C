@@ -28,7 +28,7 @@ boundaryField
     inlet
     {
         type            fixedValue;
-        value           uniform 1e-05;
+        value           uniform 0.1;
     }
     outlet
     {
@@ -37,10 +37,6 @@ boundaryField
     emptyFaces
     {
         type            empty;
-    }
-    geometry
-    {
-        type            zeroGradient;
     }
 }
 

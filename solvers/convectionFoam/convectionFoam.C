@@ -58,20 +58,28 @@ int main(int argc, char *argv[])
         while (simple.correctNonOrthogonal())
         {
 
+            C.max(0.); 
             fvScalarMatrix ConvectionEqn //(C=Concentration=rho*wf/mw)
             (
                     fvm::ddt(epsf,C) 
                     + fvm::div(phi,C) 
                     - fvm::laplacian((Dion*epsf),C)
+                    + fvm::Sp(mu*B/(Ks + C)/Y, C) // implicit treatment of source term
+                    // - mu*B*C/(Ks + C)/Y // biomass consumption, Monod kinetics
                     //+ fvm::div(phic,C) //solid movement correction
+
+                    // // simplified version to test
+                    // fvm::ddt(C) 
+                    // + fvm::div(phi,C) 
+                    // - fvm::laplacian(Dion,C)
             );
-
+            ConvectionEqn.relax();
             ConvectionEqn.solve();
-            //Cepsf = C*epsf;
-            C.max(0.); 
+            // Update boundary conditions
+            C.correctBoundaryConditions();
 
-            Dion=Df*pow((1-epss),(n-1));
-            epsf=1-epss;
+            // Dion=Df*pow((1-epss),(n-1));
+            // epsf=1-epss;
         }
 
         runTime.write();

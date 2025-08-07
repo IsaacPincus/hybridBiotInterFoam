@@ -1,0 +1,74 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.1                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+d2dt2Schemes
+{
+    default         Euler;
+}
+
+ddtSchemes
+{
+    default         Euler;
+}
+
+gradSchemes
+{
+    default         cellLimited Gauss linear 1;
+    //grad(D)         leastSquares;
+}
+
+divSchemes
+{
+    default none;
+    //default         Gauss linear;
+
+    //Scalar transport schemes
+    div(phi,C) Gauss linearUpwind grad(C);
+    
+    //Fluid Schemes
+    div((nuf*dev2(T(grad(U))))) Gauss linear;
+    div(phiByEpsf,U)  Gauss linearUpwind grad(U);
+
+    // div(phi,alpha)  Gauss vanLeer01;
+    // div(phirb,alpha) bounded Gauss upwind;
+    div(((rho*nu)*dev2(T(grad(U))))) Gauss linear;
+
+    //Solid Schemes
+    div(phis,epss)               Gauss vanLeer01;
+    div(sigmaD)                  Gauss linear;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear orthogonal; //corrected if not orthogonal
+    //laplacian(DD,D) Gauss linear corrected;
+    //default         Gauss linear corrected; // Mesh non-orthogonality is reasonably high
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         orthogonal; //corrected if non orthogonal
+    //default         corrected;
+}
+
+
+// ************************************************************************* //

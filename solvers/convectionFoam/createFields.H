@@ -58,6 +58,20 @@ volScalarField epss
     mesh
 );
 
+Info<< "Reading local biofilm concentration B\n" << endl;
+volScalarField B
+(
+    IOobject
+    (
+        "B",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh
+);
+
 Info<< "Reading/Calculating fluid fraction field 'epsf'\n" << endl;
 volScalarField epsf
 (
@@ -85,6 +99,27 @@ dimensionedScalar n
 (
     "n",
     transportProperties.lookup("n")
+);
+
+Info<< "Reading biofilm growth rate mu\n" << endl;
+dimensionedScalar mu
+(
+    "mu",
+    transportProperties.lookup("mu")
+);
+
+Info<< "Reading Monod half-saturation constant Ks\n" << endl;
+dimensionedScalar Ks
+(
+    "Ks",
+    transportProperties.lookup("Ks")
+);
+
+Info<< "Reading biomass yield rate Y\n" << endl;
+dimensionedScalar Y
+(
+    "Y",
+    transportProperties.lookup("Y")
 );
 
 Info<< "Calculating Corrected Solid-Phase Ion Diffusivity 'Dion = Df*(1-epss)^(n-1)'\n" << endl;

@@ -75,21 +75,33 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readTimeControls.H"
-        #include "CourantNo.H"
-        #include "courantNoUs.H"
-	    #include "setDeltaTUs.H"
+
+        if (activateSolidMechanics == 0)
+            {
+            #include "CourantNo.H"
+            #include "setDeltaT.H"
+	    }
+        if (activateSolidMechanics == 1)
+            { 
+            #include "CourantNo.H"
+            #include "courantNoUs.H"
+	        #include "setDeltaTUs.H"
+	    }
 
         runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
-   
+
         // --- Solid Mechanics 
+        if (activateSolidMechanics == 1)
+        {
             if(runTime.value() > runTime.startTime().value() + runTime.deltaTValue())
             { 
                 #include "solidMechanics.H"        
                 #include "epssEqn.H"
                 #include "updateVariables.H"
             }
+        }  
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
