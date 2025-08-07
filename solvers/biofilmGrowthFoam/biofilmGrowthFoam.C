@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
             (
                     fvm::ddt(B) 
                     - fvm::Sp(mu*B/(Ks + C)/Y, C) // biomass consumption, Monod kinetics, implicit
-                    + fvm::Sp(kd*B) // biomass death rate
+                    + fvm::Sp(kd, B) // biomass death rate
             );
             growthEquation.relax();
             growthEquation.solve();
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
             fvScalarMatrix deathEquation //(C=Concentration=rho*wf/mw)
             (
                     fvm::ddt(Bd) 
-                    - fvm::Sp(kd*B) // biomass death rate
+                    - fvm::Sp(kd, B) // biomass death rate
             );
             deathEquation.relax();
             deathEquation.solve();

@@ -318,7 +318,7 @@ thickness = 1e-5
 sigAlive = 4000
 sigDead = 40
 # detachment rate constant, [m/s]
-kdet = 1/3600
+kdet = 1/36000
 
 mu = 1.95e-4       # maximum growth rate for biofilm, [1/s]
 Ks = 0.1           # Monod half-saturation constant, [mol/m^3]
@@ -326,14 +326,16 @@ Yield = 0.15       # Yield of biomass
 kd = 2e-6          # biomass decay constant, [1/s]
 
 # timestep for each removal/growth step, in seconds
-dt = 600
-no_steps = 3
+dt = 1200
+no_steps = 50
 
-dt_elastic = 1e-2
+dt_elastic = 1e-3
 dt_velocity = 1e-2
-dt_transport = 2
+dt_transport = 5
 
-Bcut = 6010
+Bcut = 8000
+
+show_plots = False
 
 #%%
 ###############################################################################################################
@@ -408,17 +410,20 @@ img.save("image_cell_values.png")
 # note that meshgrid in numpy is opposite of matlab, it's (ny,nx) array indexing, like an image
 X, Y = np.meshgrid(np.linspace(0,L,Nx), np.linspace(0,W,Ny))
 # Parameters
-r0 = W/5
-x0 = 3*L/5
-y0 = W/2
+r0 = W/100
+# x0 = 3*L/5
+# y0 = W/2
 Bvalue = 6000.0
 Balive2D = np.zeros_like(mask, dtype=float)
 Bdead2D = np.zeros_like(mask, dtype=float)
 # put a patch of alive biofilm at a circle
-# Balive2D[(X - x0)**2 + (Y - y0)**2 < r0**2] = Bvalue
+for ii in range(60):
+    x0 = np.random.uniform(L/5, 4*L/5)
+    y0 = np.random.uniform(0, W)
+    Balive2D[(X - x0)**2 + (Y - y0)**2 < r0**2] = Bvalue
 # put a patch of alive biofilm at the top and bottom
-condition = ((Y < W/3) | (Y > 2*W/3)) & (X > L/5)
-Balive2D[condition] = Bvalue
+# condition = ((Y < W/3) | (Y > 2*W/3)) & (X > L/5)
+# Balive2D[condition] = Bvalue
 
 # now also setup the other systems
 caseVelocity = FoamCase(pathVelocity) # Loads the OpenFOAM case
@@ -429,9 +434,26 @@ caseTransport = FoamCase(pathTransport) # Loads the OpenFOAM case
 caseTransport.clean()
 shutil.copytree(os.path.join(pathVelocity, "constant/polyMesh"), os.path.join(pathTransport, "constant/polyMesh"), dirs_exist_ok=True)
 
+with caseElastic.control_dict as f:
+    f["endTime"] = dt_elastic
+    f["writeInterval"] = dt_elastic
+
+with caseVelocity.control_dict as f:
+    f["endTime"] = dt_velocity
+    f["writeInterval"] = dt_velocity
+
+with caseTransport.control_dict as f:
+    f["endTime"] = dt_transport
+    f["writeInterval"] = dt_transport
+
 #%%
 # start main loop here
 for step in range(no_steps):
+
+    # the epss field is anywhere there is significant amounts of biofilm
+    epss2D = 0.1 * (Balive2D + Bdead2D > 0) + 1e-5
+    epssField = to_1d(epss2D, image_cell_values)
+    BField = to_1d(Balive2D, image_cell_values)
 
     ############################### Solve elastic EQN #########################
     with caseElastic[-1]["epss"] as field: # write epss to file
@@ -447,11 +469,6 @@ for step in range(no_steps):
     # EIKONAL EQUATION SOLUTION
     ###############################################################################################################
 
-    # the epss field is anywhere there is significant amounts of biofilm
-    epss2D = 0.1 * (Balive2D + Bdead2D > 0) + 1e-5
-    epssField = to_1d(epss2D, image_cell_values)
-    BField = to_1d(Balive2D, image_cell_values)
-
     with caseElastic[-1]["sigmaEq"] as field:
         sigEqField = field.internal_field
 
@@ -466,23 +483,25 @@ for step in range(no_steps):
 
     t = skfmm.travel_time(solidIndicator2DMasked, F, dx)
 
-    plt.title('Travel time from the boundary with an obstacle')
-    plt.contour(X, Y, solidIndicator2DMasked, [0], linewidths=(3), colors='black')
-    plt.contour(X, Y, solidIndicator2DMasked.mask, [0], linewidths=(3), colors='red')
-    plt.contour(X, Y, t, np.linspace(0,1000,10))
-    plt.colorbar()
-    plt.savefig('2d_phi_travel_time_mask.png')
-    plt.show()
+    if show_plots:
+        plt.title('Travel time from the boundary with an obstacle')
+        plt.contour(X, Y, solidIndicator2DMasked, [0], linewidths=(3), colors='black')
+        plt.contour(X, Y, solidIndicator2DMasked.mask, [0], linewidths=(3), colors='red')
+        plt.contour(X, Y, t, np.linspace(0,1000,10))
+        plt.colorbar()
+        plt.savefig('2d_phi_travel_time_mask.png')
+        plt.show()
 
     # find all points in domain where t < dt
     fieldToRemove = t < dt
 
-    # plt.title('Field to Remove')
-    # plt.imshow(fieldToRemove, cmap='viridis', aspect='auto')
-    # plt.colorbar(label='Boolean values')
-    # plt.show()
-    # # plt.savefig('2d_phi_travel_time_mask.png')
-    # plt.show()
+    if show_plots:
+        plt.title('Field to Remove')
+        plt.imshow(fieldToRemove, cmap='viridis', aspect='auto')
+        plt.colorbar(label='Boolean values')
+        plt.show()
+        # plt.savefig('2d_phi_travel_time_mask.png')
+        plt.show()
 
     # in places we want to remove, set B to zero
     Balive2D[fieldToRemove] = 0
@@ -509,7 +528,7 @@ for step in range(no_steps):
     caseVelocity.run("elasticHBPF_noepss") # Run the case itself
     # update the run time for the next step
     with caseVelocity.control_dict as f:
-        f["endTime"] = f["endTime"] + dt_elastic
+        f["endTime"] = f["endTime"] + dt_velocity
 
     ######## Then calculate the scalar transport rate ##############
     # read velocity from previous calculation
@@ -521,13 +540,15 @@ for step in range(no_steps):
         field.internal_field = epssField
     with caseTransport[-1]["B"] as field: # write B to file
         field.internal_field = BField
+    with caseTransport[-1]["Bdead"] as field: # write Bdead to file
+        field.internal_field = BdeadField
     with caseTransport[-1]["U"] as field: # write velocity
         field.internal_field = Ufield
 
     caseTransport.run("convectionFoam")
     # update the run time for the next step
     with caseTransport.control_dict as f:
-        f["endTime"] = f["endTime"] + dt_elastic
+        f["endTime"] = f["endTime"] + dt_transport
 
     # %%
     ###############################################################################################################
@@ -606,19 +627,20 @@ for step in range(no_steps):
                 coords_min_t = final_neighbors[t_min_idx]
                 Balive2D[coords_min_t[0], coords_min_t[1]] = Balive2D[coords_min_t[0], coords_min_t[1]] + Balive2D[i,j]/2
 
-    plt.title('B value')
-    plt.imshow(Balive2D, cmap='viridis', aspect='auto')
-    plt.colorbar()
-    # plt.contour(X, Y, Balive2D, 50)
-    # plt.savefig('2d_phi_travel_time_mask.png')
-    plt.show()
+    if show_plots:
+        plt.title('B value')
+        plt.imshow(Balive2D, cmap='viridis', aspect='auto')
+        plt.colorbar()
+        # plt.contour(X, Y, Balive2D, 50)
+        # plt.savefig('2d_phi_travel_time_mask.png')
+        plt.show()
 
-    plt.title('Bdead value')
-    plt.imshow(Bdead2D, cmap='viridis', aspect='auto')
-    plt.colorbar()
-    # plt.contour(X, Y, Balive2D, 50)
-    # plt.savefig('2d_phi_travel_time_mask.png')
-    plt.show()
+        plt.title('Bdead value')
+        plt.imshow(Bdead2D, cmap='viridis', aspect='auto')
+        plt.colorbar()
+        # plt.contour(X, Y, Balive2D, 50)
+        # plt.savefig('2d_phi_travel_time_mask.png')
+        plt.show()
 
 
-    # %%
+# %%

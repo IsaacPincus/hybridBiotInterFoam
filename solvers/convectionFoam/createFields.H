@@ -72,6 +72,20 @@ volScalarField B
     mesh
 );
 
+Info<< "Reading local dead biofilm concentration Bdead\n" << endl;
+volScalarField Bdead
+(
+    IOobject
+    (
+        "Bdead",
+        runTime.timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    mesh
+);
+
 Info<< "Reading/Calculating fluid fraction field 'epsf'\n" << endl;
 volScalarField epsf
 (

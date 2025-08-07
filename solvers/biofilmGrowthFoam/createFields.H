@@ -123,7 +123,7 @@ dimensionedScalar mu
 );
 
 Info<< "Reading biofilm death rate kd\n" << endl;
-dimensionedScalar mu
+dimensionedScalar kd
 (
     "kd",
     transportProperties.lookup("kd")

@@ -23,13 +23,13 @@ startTime       0;
 
 stopAt          endTime; //writeNow; //endTime;
 
-endTime         1e-2;
+endTime 0.5100000000000002;
 
 deltaT          1e-5;
 
 writeControl    adjustableRunTime;
 
-writeInterval   5e-3;
+writeInterval 0.01;
 
 purgeWrite      0;
 
@@ -49,7 +49,7 @@ adjustTimeStep  yes;
 
 maxCo           0.15;
 maxAlphaCo      0.15;
-maxDeltaT       1e-4;
+maxDeltaT       1e-2;
 
 
 // ************************************************************************* //
