@@ -90,4 +90,6 @@ Terzaghi = -(epss*rhof/rhos)*fvc::grad(p);
 	//here we reconstruct the final stress tensor from everything to print
         #include "calculateStress.H"
 
+        Dsup = D*epss;
+
 // ************************************************************************* //

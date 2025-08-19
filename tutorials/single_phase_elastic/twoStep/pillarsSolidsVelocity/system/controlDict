@@ -23,7 +23,7 @@ startTime       0;
 
 stopAt          endTime; //writeNow; //endTime;
 
-endTime 0.5100000000000002;
+endTime 0.01;
 
 deltaT          1e-5;
 

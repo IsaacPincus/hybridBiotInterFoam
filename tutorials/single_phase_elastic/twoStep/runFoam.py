@@ -297,6 +297,20 @@ def to_2d(array_1d, index_map):
     values_2d[valid] = array_1d[index_map[valid]]
     return values_2d
 
+def get_boundaries(binary_image):
+    # 4-connectivity (only horizontal and vertical neighbors)
+    boundaries = skimage.segmentation.find_boundaries(binary_image.astype(int), 
+                                                   connectivity=1,  # 4-connectivity
+                                                   mode='inner')
+    # 
+    # # 8-connectivity (includes diagonal neighbors)
+    # boundaries = skimage.segmentation.find_boundaries(binary_image.astype(int), 
+    #                                                connectivity=2,  # 8-connectivity  
+    #                                                mode='inner')
+
+    boundary_coords = np.column_stack(np.where(boundaries))
+    
+    return boundary_coords
 
 ## constants, setting up initial conditions etc
 pathVelocity = './pillarsSolidsVelocity'
@@ -327,15 +341,20 @@ kd = 2e-6          # biomass decay constant, [1/s]
 
 # timestep for each removal/growth step, in seconds
 dt = 1200
-no_steps = 50
+no_steps = 3
 
-dt_elastic = 1e-3
+dt_elastic = 1e-2
 dt_velocity = 1e-2
 dt_transport = 5
+
+# new bits of biofilm each timestep
+n_new = 5
 
 Bcut = 8000
 
 show_plots = False
+
+rng = np.random.default_rng()
 
 #%%
 ###############################################################################################################
@@ -416,12 +435,21 @@ r0 = W/100
 Bvalue = 6000.0
 Balive2D = np.zeros_like(mask, dtype=float)
 Bdead2D = np.zeros_like(mask, dtype=float)
-# put a patch of alive biofilm at a circle
-for ii in range(60):
-    x0 = np.random.uniform(L/5, 4*L/5)
-    y0 = np.random.uniform(0, W)
+# # put a patch of alive biofilm at a circle
+# for ii in range(1):
+#     x0 = np.random.uniform(L/5, 4*L/5)
+#     y0 = np.random.uniform(0, W)
+#     Balive2D[(X - x0)**2 + (Y - y0)**2 < r0**2] = Bvalue
+# only next to mask, in a circle
+for ii in range(20):
+    # random location 
+    rand_loc = rng.choice(get_boundaries(mask), axis=0)
+    x0 = X[rand_loc[0], rand_loc[1]]
+    y0 = Y[rand_loc[0], rand_loc[1]]
+    # print(f"x0: {x0:.2g}, y0: {y0:.2g}")
     Balive2D[(X - x0)**2 + (Y - y0)**2 < r0**2] = Bvalue
-# put a patch of alive biofilm at the top and bottom
+    # Balive2D[rand_loc[0], rand_loc[1]] = Bvalue
+# # put a patch of alive biofilm at the top and bottom
 # condition = ((Y < W/3) | (Y > 2*W/3)) & (X > L/5)
 # Balive2D[condition] = Bvalue
 
@@ -626,6 +654,14 @@ for step in range(no_steps):
                 t_min_idx = np.argmin(t_vals)
                 coords_min_t = final_neighbors[t_min_idx]
                 Balive2D[coords_min_t[0], coords_min_t[1]] = Balive2D[coords_min_t[0], coords_min_t[1]] + Balive2D[i,j]/2
+#%%
+    # place biofilm in random locations
+    for i in range(n_new):
+        # anywhere
+        # rand_loc = rng.choice(np.where(mask), axis=1)
+        # location next to grains
+        rand_loc = rng.choice(get_boundaries(mask), axis=0)
+        Balive2D[rand_loc[0], rand_loc[1]] = Bvalue
 
     if show_plots:
         plt.title('B value')
