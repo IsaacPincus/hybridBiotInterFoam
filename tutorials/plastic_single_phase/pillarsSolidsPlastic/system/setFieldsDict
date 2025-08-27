@@ -20,36 +20,32 @@ defaultFieldValues
     volScalarFieldValue epss    1e-5
 );
 
-xc1 -8e-5;
-yc1 5e-5;
-xc2 1.5e-4;
-yc2 3.4e-5;
-R 3e-5;
-epssBiofilm 2e-1;
+x1 0.0003;
+y1 0.0008;
+x2 10;
+y2 10;
+x3 $x1;
+y3 0.0005;
+x4 10;
+y4 -10;
+R 3e-4;
+epssBiofilm 6e-1;
 
 regions
 (
 
-    // Cylinder region
-    cylinderToCell
+    boxToCell
     {
-        p1 ($xc1 $yc1 -1);        // Bottom center of cylinder
-        p2 ($xc1 $yc1  1);        // Top center of cylinder  
-        radius $R;         // Cylinder radius
-        
+        box ($x1 $y1 -1.0) ($x2 $y2 1.0);  // Define your rectangular box
         fieldValues
         (
             volScalarFieldValue epss    $epssBiofilm      // Inside cylinder: biofilm (solid)
         );
     }
 
-    // Cylinder region
-    cylinderToCell
+    boxToCell
     {
-        p1 ($xc2 $yc2 -1);        // Bottom center of cylinder
-        p2 ($xc2 $yc2  1);        // Top center of cylinder  
-        radius $R;         // Cylinder radius
-        
+        box ($x3 $y4 -1.0) ($x4 $y3 1.0);  // Define your rectangular box
         fieldValues
         (
             volScalarFieldValue epss    $epssBiofilm      // Inside cylinder: biofilm (solid)

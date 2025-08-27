@@ -11,45 +11,47 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      controlDict;
+    object      setFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     elasticHBPF_noepss;
+defaultFieldValues
+(
+    volScalarFieldValue epss    1e-5
+);
 
-startFrom       latestTime;
+x1 0.00003;
+y1 0.00003;
+x2 10;
+y2 10;
+x3 $x1;
+y3 0.00002;
+x4 10;
+y4 -10;
+R 3e-4;
+epssBiofilm 6e-1;
 
-startTime       0;
+regions
+(
 
-stopAt          endTime; //writeNow; //endTime;
+    boxToCell
+    {
+        box ($x1 $y1 -1.0) ($x2 $y2 1.0);  // Define your rectangular box
+        fieldValues
+        (
+            volScalarFieldValue epss    $epssBiofilm      // Inside cylinder: biofilm (solid)
+        );
+    }
 
-endTime 0.49000000000000027;
-
-deltaT          1e-5;
-
-writeControl    adjustableRunTime;
-
-writeInterval 0.01;
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  10;
-
-writeCompression uncompressed;
-
-timeFormat      general;
-
-timePrecision   10;
-
-runTimeModifiable yes;
-
-adjustTimeStep  yes;
-
-maxCo           0.15;
-maxAlphaCo      0.15;
-maxDeltaT       1e-2;
+    boxToCell
+    {
+        box ($x3 $y4 -1.0) ($x4 $y3 1.0);  // Define your rectangular box
+        fieldValues
+        (
+            volScalarFieldValue epss    $epssBiofilm      // Inside cylinder: biofilm (solid)
+        );
+    }
+);
 
 
 // ************************************************************************* //

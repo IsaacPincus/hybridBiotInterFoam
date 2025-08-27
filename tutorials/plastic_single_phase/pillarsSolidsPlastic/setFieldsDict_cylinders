@@ -1,0 +1,91 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  plus                                  |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      setFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+defaultFieldValues
+(
+    volScalarFieldValue epss    1e-5
+);
+
+xc1 0.0008;
+yc1 0.001;
+xc2 0.0013;
+yc2 0.00036;
+xc3 0.0004;
+yc3 0.00011;
+xc4 0.0016;
+yc4 0.0012;
+R 3e-4;
+epssBiofilm 6e-1;
+
+regions
+(
+
+    // Cylinder region
+    cylinderToCell
+    {
+        p1 ($xc1 $yc1 -1);        // Bottom center of cylinder
+        p2 ($xc1 $yc1  1);        // Top center of cylinder  
+        radius $R;         // Cylinder radius
+        
+        fieldValues
+        (
+            volScalarFieldValue epss    $epssBiofilm      // Inside cylinder: biofilm (solid)
+        );
+    }
+
+    // Cylinder region
+    cylinderToCell
+    {
+        p1 ($xc2 $yc2 -1);        // Bottom center of cylinder
+        p2 ($xc2 $yc2  1);        // Top center of cylinder  
+        radius $R;         // Cylinder radius
+        
+        fieldValues
+        (
+            volScalarFieldValue epss    $epssBiofilm      // Inside cylinder: biofilm (solid)
+        );
+    }
+
+    // Cylinder region
+    cylinderToCell
+    {
+        p1 ($xc3 $yc3 -1);        // Bottom center of cylinder
+        p2 ($xc3 $yc3  1);        // Top center of cylinder  
+        radius $R;         // Cylinder radius
+        
+        fieldValues
+        (
+            volScalarFieldValue epss    $epssBiofilm      // Inside cylinder: biofilm (solid)
+        );
+    }
+
+    // Cylinder region
+    cylinderToCell
+    {
+        p1 ($xc4 $yc4 -1);        // Bottom center of cylinder
+        p2 ($xc4 $yc4  1);        // Top center of cylinder  
+        radius $R;         // Cylinder radius
+        
+        fieldValues
+        (
+            volScalarFieldValue epss    $epssBiofilm      // Inside cylinder: biofilm (solid)
+        );
+    }
+);
+
+
+// ************************************************************************* //

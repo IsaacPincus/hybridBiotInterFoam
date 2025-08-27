@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
             #include "CourantNo.H"
             #include "CourantNoUs.H"
             #include "alphaCourantNo.H"
-	    #include "setDeltaTUs.H"
+	        #include "setDeltaTUs.H"
 	    }
         }
 
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 
             mixture.correct(); 
   
-	    #include "updateVariables.H"
+	        #include "updateVariables.H"
             #include "UEqn.H"
 
             // --- Pressure corrector loop

@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     {
         #include "readTimeControls.H"
         #include "CourantNo.H"
-	#include "courantNoUs.H"
+	    #include "courantNoUs.H"
         #include "setDeltaTUs.H"
 
         runTime++;
@@ -72,18 +72,18 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         
-//SOLID MOMEVMENT SECTION // 
+    //SOLID MOMEVMENT SECTION // 
 
-if(runTime.value() > runTime.startTime().value() + runTime.deltaTValue())
-{
+    if(runTime.value() > runTime.startTime().value() + runTime.deltaTValue())
+    {
 
-         solid.correct(); //Non-Newtoninan Viscocity Update
-         #include "UsEqn.H" //Porous Media Velocity
-         #include "epssEqn.H" //Porous Media Conservation Equation
-	 #include "updateVariables.H" //Update epsf,k, ext...
-}
+        solid.correct(); //Non-Newtoninan Viscocity Update
+        #include "UsEqn.H" //Porous Media Velocity
+        #include "epssEqn.H" //Porous Media Conservation Equation
+        #include "updateVariables.H" //Update epsf,k, ext...
+    }
 
-//FLUID VELOCITY SECTION//
+    //FLUID VELOCITY SECTION//
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
@@ -97,22 +97,22 @@ if(runTime.value() > runTime.startTime().value() + runTime.deltaTValue())
                 #include "pEqn.H"
             }         
         }
-             
-	if (SolveConvectionEqn==1)
-	{
-	#include "convectionEqn.H" //Scalar Transport
-	}
- 
-        runTime.write();
+                
+        if (SolveConvectionEqn==1)
+        {
+        #include "convectionEqn.H" //Scalar Transport
+        }
+    
+            runTime.write();
 
-        Info<< "\nExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
+            Info<< "\nExecutionTime = " << runTime.elapsedCpuTime() << " s"
+                << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+                << nl << endl;
+        }
 
-        Info<< "End\n" << endl;
+            Info<< "End\n" << endl;
 
-    return 0;
+        return 0;
 }
 
 

@@ -50,7 +50,7 @@ transportModel  HerschelBulkleyQuemada;
 HerschelBulkleyQuemadaCoeffs
 {
 nu0      [ 0 2 -1 0 0 0 0 ] 1e05;
-    tau0     [ 0 2 -2 0 0 0 0 ] 0.02;
+    tau0     [ 0 2 -2 0 0 0 0 ] 0.001;
 epssMax  [ 0 0 0 0 0 0 0 ] 1000.0;
     nuf        [ 0 2 -1 0 0 0 0 ] 1e-6;
 Dstar    [ 0 0 0 0 0 0 0 ] 0.0;

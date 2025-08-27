@@ -341,7 +341,7 @@ kd = 2e-6          # biomass decay constant, [1/s]
 
 # timestep for each removal/growth step, in seconds
 dt = 1200
-no_steps = 3
+no_steps = 100
 
 dt_elastic = 1e-2
 dt_velocity = 1e-2
@@ -530,6 +530,19 @@ for step in range(no_steps):
         plt.show()
         # plt.savefig('2d_phi_travel_time_mask.png')
         plt.show()
+
+    # in places we want to remove, set B to zero
+    Balive2D[fieldToRemove] = 0
+    Bdead2D[fieldToRemove] = 0
+    # now go through and find regions with completely detached biofilm, no part touching grains
+    labeled_image = skimage.measure.label(Balive2D+Bdead2D+mask>0, connectivity=2)
+    for i in range(1,labeled_image.max()):
+        # get just the parts of the image with this value
+        comp = labeled_image==i
+        # check if there's any overlap with the mask
+        doesOverlap = np.any(comp&mask)
+        if ~doesOverlap:
+            fieldToRemove[comp] = True
 
     # in places we want to remove, set B to zero
     Balive2D[fieldToRemove] = 0
