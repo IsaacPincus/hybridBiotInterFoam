@@ -317,8 +317,11 @@ pathVelocity = './pillarsSolidsVelocity'
 pathElastic = './pillarsSolidsElastic'
 pathTransport = './scalarTransport'
 
+show_plots = False
+rng = np.random.default_rng()
+
 # Read image
-mask, openfoam_image_field, Nx, Ny = image_to_openfoam_mask(image_path='ManyCylinders.png', method='mean', invert=False)
+mask, openfoam_image_field, Nx, Ny = image_to_openfoam_mask(image_path='ManyCylindersNew.png', method='mean', invert=True)
 
 # Nx = 360
 # Ny = 90
@@ -341,7 +344,7 @@ kd = 2e-6          # biomass decay constant, [1/s]
 
 # timestep for each removal/growth step, in seconds
 dt = 1200
-no_steps = 100
+no_steps = 500
 
 dt_elastic = 1e-2
 dt_velocity = 1e-2
@@ -352,9 +355,6 @@ n_new = 5
 
 Bcut = 8000
 
-show_plots = False
-
-rng = np.random.default_rng()
 
 #%%
 ###############################################################################################################
@@ -377,8 +377,12 @@ output = create_blockmesh_dict(Nx, Ny, L, W, thickness=thickness, output_dir=os.
 
 caseElastic.run("blockMesh") # do blockMesh
 
-# make sure that we set epss back to the uniform value
+# make sure that we set all fields back to the uniform value
 with caseElastic[0]["epss"] as field: # write epss to file
+    field.internal_field = 0
+with caseElastic[0]["B"] as field: # write epss to file
+    field.internal_field = 0
+with caseElastic[0]["Bdead"] as field: # write epss to file
     field.internal_field = 0
 
 # make sure that we set U back to the uniform value
@@ -424,6 +428,12 @@ else:
 # Convert to PIL Image and save
 img = Image.fromarray(img_array, mode='L')  # 'L' = 8-bit grayscale
 img.save("image_cell_values.png")
+
+if show_plots:
+    plt.title('Field to Remove')
+    plt.imshow(to_2d(openfoam_image_field, image_cell_values), cmap='viridis', aspect='auto')
+    plt.colorbar(label='Boolean values')
+    plt.show()
 
 # now, we want to write some other fields. We want each pixel to have a value of Balive and Bdead, for the amount of biofilm there.
 # note that meshgrid in numpy is opposite of matlab, it's (ny,nx) array indexing, like an image
@@ -529,21 +539,33 @@ for step in range(no_steps):
         plt.colorbar(label='Boolean values')
         plt.show()
         # plt.savefig('2d_phi_travel_time_mask.png')
-        plt.show()
+        # plt.show()
 
     # in places we want to remove, set B to zero
     Balive2D[fieldToRemove] = 0
     Bdead2D[fieldToRemove] = 0
     # now go through and find regions with completely detached biofilm, no part touching grains
-    labeled_image = skimage.measure.label(Balive2D+Bdead2D+mask>0, connectivity=2)
-    for i in range(1,labeled_image.max()):
+    maskLabel = np.float64(~mask)
+    totalBplusMask = maskLabel + Balive2D + Bdead2D
+    totalBplusMask[np.isnan(totalBplusMask)] = 1.0
+    labeled_image = skimage.measure.label(totalBplusMask>0, connectivity=2)
+    if show_plots:
+        plt.title('labeled image')
+        plt.imshow(labeled_image, cmap='viridis', aspect='auto')
+        plt.colorbar(label='Labels of each region')
+        plt.show()
+    for i in range(1,labeled_image.max()+1):
         # get just the parts of the image with this value
         comp = labeled_image==i
         # check if there's any overlap with the mask
-        doesOverlap = np.any(comp&mask)
+        doesOverlap = np.any(comp&~mask)
         if ~doesOverlap:
             fieldToRemove[comp] = True
-
+    if show_plots:
+        plt.title('area to remove')
+        plt.imshow(fieldToRemove, cmap='viridis', aspect='auto')
+        plt.colorbar(label='true or false')
+        plt.show()
     # in places we want to remove, set B to zero
     Balive2D[fieldToRemove] = 0
     Bdead2D[fieldToRemove] = 0
@@ -691,5 +713,21 @@ for step in range(no_steps):
         # plt.savefig('2d_phi_travel_time_mask.png')
         plt.show()
 
+    # copy B, Bdead, and C to elastic, for visualisation purposes
+    # write internal fields
+    with caseTransport[-1]["B"] as field: # write velocity
+        BfieldCopy = field.internal_field
+    with caseElastic[-1]["B"] as field: # write velocity
+        field.internal_field = BfieldCopy
+
+    with caseTransport[-1]["Bdead"] as field: # write velocity
+        BdeadfieldCopy = field.internal_field
+    with caseElastic[-1]["Bdead"] as field: # write velocity
+        field.internal_field = BdeadfieldCopy
+
+    with caseTransport[-1]["C"] as field: # write velocity
+        CfieldCopy = field.internal_field
+    with caseElastic[-1]["C"] as field: # write velocity
+        field.internal_field = CfieldCopy
 
 # %%
